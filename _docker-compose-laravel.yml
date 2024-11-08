@@ -1,9 +1,16 @@
 services:
+  # Laravel
+  laravel:
+    image: nadojba/laravel:latest
+    container_name: laravel
+    networks:
+      - laranet
+
   # MySQL    
   db:
     image: mysql:5.7
     command: --innodb-use-native-aio=0
-    container_name: mysql_db
+    container_name: mysql
     restart: always
     tty: true
     volumes:
@@ -12,28 +19,20 @@ services:
       - laranet
     environment:
       MYSQL_DATABASE: laravel
+      MYSQL_USER: root
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_PASSWORD: 1234
-      MYSQL_USER: nadojba
-
     ports:
       - "3307:3306"
-  # NODEJS
-  node:
-    image: nadojba/nodejs:latest
-    container_name: app_node
-    entrypoint: dockerize -wait tcp://db:3306 -timeout 20s docker-entrypoint.sh
-    build:
-      context: node
+
+  # Nginx    
+  nginx:
+    image: nadojba/nginx:prod
+    container_name: nginx
     networks:
       - laranet
-    volumes:
-      - ./node:/usr/src/app
-    tty: true
     ports:
-      - "5000:5000"
-    depends_on:
-      - db
+      - "7000:80"
+
 networks:
   laranet:
     driver: bridge
